@@ -716,7 +716,7 @@ namespace RDBEd
 
         public void SaveRDB(string path)
         {
-            BinaryWriter f = new BinaryWriter(File.OpenWrite(path), System.Text.Encoding.UTF8, false);
+            BinaryWriter f = new BinaryWriter(File.Create(path), System.Text.Encoding.UTF8, false);
             f.Write(new byte[] { (byte)'R',(byte)'A',(byte)'R',(byte)'C',(byte)'H',(byte)'D',(byte)'B',0 });
             f.Write((ulong)0); //offset
 
