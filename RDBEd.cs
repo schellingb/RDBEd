@@ -477,7 +477,7 @@ namespace RDBEd
                         MsgPackValue key = rmsgpack_read(rdb, objs, ref off);
                         if (key.mode != MsgPackMode.String) throw new Exception("RDB Key must be a string");
                         MsgPackValue val = rmsgpack_read(rdb, objs, ref off);
-                        try { map.Add(string.Intern(key.UTF8String(rdb)), val); } catch { }
+                        try { map[string.Intern(key.UTF8String(rdb))] = val; } catch { }
                     }
                     break;
                 default:
@@ -498,9 +498,14 @@ namespace RDBEd
             UInt64 magic = BitConverter.ToUInt64(rdb, 0).FromBigEndian();
             if (magic != 0x5241524348444200) throw new Exception("File is not in RDB format");
             UInt64 offset = BitConverter.ToUInt64(rdb, 8).FromBigEndian();
+            Int64 count = Int64.MaxValue;
             int off = (int)offset;
-            Dictionary<string, MsgPackValue> meta = (Dictionary<string, MsgPackValue>)objs[rmsgpack_read(rdb, objs, ref off).obj];
-            Int64 count = meta["count"].int64;
+            if (offset != 0)
+            {
+                int obj = rmsgpack_read(rdb, objs, ref off).obj;
+                Dictionary<string, MsgPackValue> meta = (Dictionary<string, MsgPackValue>)objs[obj];
+                count = meta["count"].int64;
+            }
 
             string rdbKeyName           = string.Intern("name"          );
             string rdbKeyDescription    = string.Intern("description"   );
@@ -529,9 +534,12 @@ namespace RDBEd
 
             off = 16;
             MsgPackValue v;
-            for (Int64 i = 0; i != count; i++)
+            for (Int64 i = 0; i != count && off != rdb.LongLength; i++)
             {
-                Dictionary<string, MsgPackValue> row = (Dictionary<string, MsgPackValue>)objs[rmsgpack_read(rdb, objs, ref off).obj];
+                MsgPackValue mpv = rmsgpack_read(rdb, objs, ref off);
+                if (mpv.mode != MsgPackMode.Map) continue;
+                Dictionary<string, MsgPackValue> row = (Dictionary<string, MsgPackValue>)objs[mpv.obj];
+                if (off == rdb.LongLength && row.Count == 1 && row.ContainsKey("count")) continue; // skip count that couldn't be found via offset
                 Entry e = new Entry();
                 int releaseDay = 0, releaseMonth = 0, releaseYear = 0;
                 if (row.TryGetValue(rdbKeyName         , out v) && v.mode == MsgPackMode.String  ) e.Name          = v.UTF8String(rdb);
