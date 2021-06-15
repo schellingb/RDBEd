@@ -50,7 +50,7 @@ namespace RDBEd
         public string   Description,   OrgDescription;    public string   ColDescription   { get { return Description;    } set { Set(EFieldIndices.Description,   ref Description,   OrgDescription,   value); } }
         public string   Genre,         OrgGenre;          public string   ColGenre         { get { return Genre;          } set { Set(EFieldIndices.Genre,         ref Genre,         OrgGenre,         value); } }
         public string   RomName,       OrgRomName;        public string   ColRomName       { get { return RomName;        } set { Set(EFieldIndices.RomName,       ref RomName,       OrgRomName,       value); } }
-        public uint     Size,          OrgSize;           public uint     ColSize          { get { return Size;           } set { Set(EFieldIndices.Size,          ref Size,          OrgSize,          value); } }
+        public UInt64   Size,          OrgSize;           public UInt64   ColSize          { get { return Size;           } set { Set(EFieldIndices.Size,          ref Size,          OrgSize,          value); } }
         public uint     Users,         OrgUsers;          public uint     ColUsers         { get { return Users;          } set { Set(EFieldIndices.Users,         ref Users,         OrgUsers,         value); } }
         public DateTime Release,       OrgRelease;        public DateTime ColRelease       { get { return Release;        } set { Set(EFieldIndices.Release,       ref Release,       OrgRelease,       value); } }
         public bool     Rumble,        OrgRumble;         public bool     ColRumble        { get { return Rumble;         } set { Set(EFieldIndices.Rumble,        ref Rumble,        OrgRumble,        value); } }
@@ -132,6 +132,14 @@ namespace RDBEd
         }
 
         void Set(EFieldIndices idx, ref uint val, uint orgval, uint newval)
+        {
+            FlagModified(idx, (newval != orgval));
+            FlagWarning(idx, false);
+            val = newval;
+            SearchCache = null;
+        }
+
+        void Set(EFieldIndices idx, ref UInt64 val, UInt64 orgval, UInt64 newval)
         {
             FlagModified(idx, (newval != orgval));
             FlagWarning(idx, false);
@@ -530,7 +538,7 @@ namespace RDBEd
                 if (row.TryGetValue(rdbKeyDescription  , out v) && v.mode == MsgPackMode.String  ) e.Description   = v.UTF8String(rdb);
                 if (row.TryGetValue(rdbKeyGenre        , out v) && v.mode == MsgPackMode.String  ) e.Genre         = v.UTF8String(rdb);
                 if (row.TryGetValue(rdbKeyRomName      , out v) && v.mode == MsgPackMode.String  ) e.RomName       = v.UTF8String(rdb);
-                if (row.TryGetValue(rdbKeySize         , out v) && v.mode == MsgPackMode.Unsigned) e.Size          = (uint)v.uint64;
+                if (row.TryGetValue(rdbKeySize         , out v) && v.mode == MsgPackMode.Unsigned) e.Size          = (UInt64)v.uint64;
                 if (row.TryGetValue(rdbKeyUsers        , out v) && v.mode == MsgPackMode.Unsigned) e.Users         = (uint)v.uint64;
                 if (row.TryGetValue(rdbKeyReleaseDay   , out v) && v.mode == MsgPackMode.Unsigned) releaseDay      = (int)v.uint64;
                 if (row.TryGetValue(rdbKeyReleaseMonth , out v) && v.mode == MsgPackMode.Unsigned) releaseMonth    = (int)v.uint64;
@@ -670,7 +678,7 @@ namespace RDBEd
                     if (obj.TryGetValue(datKeyDescription  , out v)) e.Description   = v;
                     if (obj.TryGetValue(datKeyGenre        , out v)) e.Genre         = v;
                     if (rom.TryGetValue(datKeyName         , out v)) e.RomName       = v;
-                    if (rom.TryGetValue(datKeySize         , out v)) e.Size          = Convert.ToUInt32(v);
+                    if (rom.TryGetValue(datKeySize         , out v)) e.Size          = Convert.ToUInt64(v);
                     if (obj.TryGetValue(datKeyUsers        , out v)) e.Users         = Convert.ToUInt32(v);
                     if (obj.TryGetValue(datKeyReleaseDay   , out v)) releaseDay      = Convert.ToInt32(v);
                     if (obj.TryGetValue(datKeyReleaseMonth , out v)) releaseMonth    = Convert.ToInt32(v);
@@ -752,6 +760,14 @@ namespace RDBEd
                 else if (i < 65536) { f.Write((byte)MsgPackType.UINT16); f.Write(((ushort)i).ToBigEndian()); }
                 else                { f.Write((byte)MsgPackType.UINT32); f.Write(((uint)i).ToBigEndian()); }
             };
+            Action<UInt64> MsgPackWriteUint64 = (UInt64 i) =>
+            {
+                if (i < (uint)MsgPackType.FIXMAP) { f.Write((byte)i); }
+                else if (i <        256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
+                else if (i <      65536) { f.Write((byte)MsgPackType.UINT16); f.Write(((ushort)i).ToBigEndian()); }
+                else if (i < 4294967295) { f.Write((byte)MsgPackType.UINT16); f.Write(((uint)i).ToBigEndian()); }
+                else                     { f.Write((byte)MsgPackType.UINT64); f.Write(((UInt64)i).ToBigEndian()); }
+            };
 
             uint entryCount = 0;
             foreach (Entry e in this)
@@ -785,7 +801,7 @@ namespace RDBEd
                 if (!string.IsNullOrWhiteSpace(e.Description  ))  { MsgPackWriteString("description"   ); MsgPackWriteString(e.Description      ); }
                 if (!string.IsNullOrWhiteSpace(e.Genre        ))  { MsgPackWriteString("genre"         ); MsgPackWriteString(e.Genre            ); }
                 if (!string.IsNullOrWhiteSpace(e.RomName      ))  { MsgPackWriteString("rom_name"      ); MsgPackWriteString(e.RomName          ); }
-                if (e.Size                                 != 0)  { MsgPackWriteString("size"          ); MsgPackWriteUint(e.Size               ); }
+                if (e.Size                                 != 0)  { MsgPackWriteString("size"          ); MsgPackWriteUint64(e.Size             ); }
                 if (e.Users                                != 0)  { MsgPackWriteString("users"         ); MsgPackWriteUint(e.Users              ); }
                 if (e.Release.ToBinary()                   != 0)  { MsgPackWriteString("releaseday"    ); MsgPackWriteUint((uint)e.Release.Day  ); }
                 if (e.Release.ToBinary()                   != 0)  { MsgPackWriteString("releasemonth"  ); MsgPackWriteUint((uint)e.Release.Month); }
