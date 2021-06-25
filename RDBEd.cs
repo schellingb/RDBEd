@@ -773,7 +773,7 @@ namespace RDBEd
                 if (i < (uint)MsgPackType.FIXMAP) { f.Write((byte)i); }
                 else if (i <        256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
                 else if (i <      65536) { f.Write((byte)MsgPackType.UINT16); f.Write(((ushort)i).ToBigEndian()); }
-                else if (i < 4294967295) { f.Write((byte)MsgPackType.UINT16); f.Write(((uint)i).ToBigEndian()); }
+                else if (i < 4294967295) { f.Write((byte)MsgPackType.UINT32); f.Write(((uint)i).ToBigEndian()); }
                 else                     { f.Write((byte)MsgPackType.UINT64); f.Write(((UInt64)i).ToBigEndian()); }
             };
 
@@ -1170,6 +1170,7 @@ namespace RDBEd
                 e.SetOrg();
             }
             Modifications = 0;
+            Deletions = 0;
             RDBEdUI.UpdateCounts(true);
         }
 
