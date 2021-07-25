@@ -171,7 +171,7 @@ namespace RDBEd
                 if (hex[i] < '0' || (hex[i] > '9' && hex[i] < 'A') || hex[i] > 'F')
                     hex = hex.Remove(i--, 1);
             if (hex.Length > len) return hex.Substring(0, len);
-            while (hex.Length < len) hex += '0';
+            while (hex.Length < len) hex = hex.Insert(0, "0");
             return hex;
         }
 
