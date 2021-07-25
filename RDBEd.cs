@@ -22,10 +22,10 @@ using System.Text.RegularExpressions;
 
 [assembly: System.Reflection.AssemblyProduct("RDBEd")]
 [assembly: System.Reflection.AssemblyTitle("RDBEd - Retro RDB & DAT Editor")]
-[assembly: System.Reflection.AssemblyVersion("1.2.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.2.0.0")]
+[assembly: System.Reflection.AssemblyVersion("1.3.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.3.0.0")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
-namespace RDBEd { static class About { public const string Text = "RDBEd 1.2 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
+namespace RDBEd { static class About { public const string Text = "RDBEd 1.3 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
 
 namespace RDBEd
 {
