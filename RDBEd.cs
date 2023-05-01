@@ -821,9 +821,9 @@ namespace RDBEd
                 if (e.Release.ToBinary()                   != 0)  { MsgPackWriteString("releaseday"    ); MsgPackWriteUint((uint)e.Release.Day  ); }
                 if (e.Release.ToBinary()                   != 0)  { MsgPackWriteString("releasemonth"  ); MsgPackWriteUint((uint)e.Release.Month); }
                 if (e.Release.ToBinary()                   != 0)  { MsgPackWriteString("releaseyear"   ); MsgPackWriteUint((uint)e.Release.Year ); }
-                if (e.Rumble                                   )  { MsgPackWriteString("rumble"        ); f.Write((byte)MsgPackType.TRUE);         }
-                if (e.Analog                                   )  { MsgPackWriteString("analog"        ); f.Write((byte)MsgPackType.TRUE);         }
-                if (e.Coop                                     )  { MsgPackWriteString("coop"          ); f.Write((byte)MsgPackType.TRUE);         }
+                if (e.Rumble                                   )  { MsgPackWriteString("rumble"        ); MsgPackWriteUint(1);                     }
+                if (e.Analog                                   )  { MsgPackWriteString("analog"        ); MsgPackWriteUint(1);                     }
+                if (e.Coop                                     )  { MsgPackWriteString("coop"          ); MsgPackWriteUint(1);                     }
                 if (!string.IsNullOrWhiteSpace(e.EnhancementHW))  { MsgPackWriteString("enhancement_hw"); MsgPackWriteString(e.EnhancementHW    ); }
                 if (!string.IsNullOrWhiteSpace(e.Franchise    ))  { MsgPackWriteString("franchise"     ); MsgPackWriteString(e.Franchise        ); }
                 if (!string.IsNullOrWhiteSpace(e.OriginalTitle))  { MsgPackWriteString("original_title"); MsgPackWriteString(e.OriginalTitle    ); }
