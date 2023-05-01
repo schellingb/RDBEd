@@ -491,6 +491,94 @@ namespace RDBEd
             return res;
         }
 
+        static MsgPackMode rmsgpack_dump(byte[] rdb, System.Text.StringBuilder sb, ref int off)
+        {
+            byte type = rdb[off++];
+            UInt64 len;
+            switch (type)
+            {
+                case (byte)MsgPackType.NIL:   sb.AppendLine("[NIL]"); return MsgPackMode.Nil;
+                case (byte)MsgPackType.FALSE: sb.AppendLine("[BOOL] FALSE"); return MsgPackMode.Boolean;
+                case (byte)MsgPackType.TRUE:  sb.AppendLine("[BOOL] TRUE"); return MsgPackMode.Boolean;
+                case (byte)MsgPackType.STR8:  sb.Append("[STR8]"); len = rdb[off++]; goto READ_STRING;
+                case (byte)MsgPackType.STR16: sb.Append("[STR16]"); len = BitConverter.ToUInt16(rdb, off).FromBigEndian(); off += 2; goto READ_STRING;
+                case (byte)MsgPackType.STR32: sb.Append("[STR32]"); len = BitConverter.ToUInt32(rdb, off).FromBigEndian(); off += 4; goto READ_STRING;
+                READ_STRING:
+                    sb.AppendLine(" [" + len.ToString() + "] " + System.Text.Encoding.UTF8.GetString(rdb, off, (int)len));
+                    off += (int)len;
+                    return MsgPackMode.String;
+                case (byte)MsgPackType.BIN8:  sb.Append("[BIN8]"); len = rdb[off++]; goto READ_BIN;
+                case (byte)MsgPackType.BIN16: sb.Append("[BIN16]"); len = BitConverter.ToUInt16(rdb, off).FromBigEndian(); off += 2; goto READ_BIN;
+                case (byte)MsgPackType.BIN32: sb.Append("[BIN32]"); len = BitConverter.ToUInt32(rdb, off).FromBigEndian(); off += 4; goto READ_BIN;
+                READ_BIN:
+                    sb.AppendLine(" [" + len.ToString() + "] " + BitConverter.ToString(rdb, off, (int)len).Replace("-", ""));
+                    off += (int)len;
+                    return MsgPackMode.Bin;
+                case (byte)MsgPackType.UINT8:  sb.AppendLine("[UINT8] "  + (rdb[off++]                                     ).ToString());           return MsgPackMode.Unsigned;
+                case (byte)MsgPackType.UINT16: sb.AppendLine("[UINT16] " + (BitConverter.ToUInt16(rdb, off).FromBigEndian()).ToString()); off += 2; return MsgPackMode.Unsigned;
+                case (byte)MsgPackType.UINT32: sb.AppendLine("[UINT32] " + (BitConverter.ToUInt32(rdb, off).FromBigEndian()).ToString()); off += 4; return MsgPackMode.Unsigned;
+                case (byte)MsgPackType.UINT64: sb.AppendLine("[UINT64] " + (BitConverter.ToUInt64(rdb, off).FromBigEndian()).ToString()); off += 8; return MsgPackMode.Unsigned;
+                case (byte)MsgPackType.INT8:   sb.AppendLine("[INT8] "   + ((sbyte)rdb[off++]                              ).ToString());           return MsgPackMode.Signed;
+                case (byte)MsgPackType.INT16:  sb.AppendLine("[INT16] "  + (BitConverter.ToInt16(rdb, off).FromBigEndian() ).ToString()); off += 2; return MsgPackMode.Signed;
+                case (byte)MsgPackType.INT32:  sb.AppendLine("[INT32] "  + (BitConverter.ToInt32(rdb, off).FromBigEndian() ).ToString()); off += 4; return MsgPackMode.Signed;
+                case (byte)MsgPackType.INT64:  sb.AppendLine("[INT64] "  + (BitConverter.ToInt64(rdb, off).FromBigEndian() ).ToString()); off += 8; return MsgPackMode.Signed;
+                case (byte)MsgPackType.ARRAY16: sb.Append("[ARRAY16]"); len = BitConverter.ToUInt16(rdb, off).FromBigEndian(); off += 2; goto READ_ARRAY;
+                case (byte)MsgPackType.ARRAY32: sb.Append("[ARRAY32]"); len = BitConverter.ToUInt32(rdb, off).FromBigEndian(); off += 4; goto READ_ARRAY;
+                READ_ARRAY:
+                    sb.AppendLine(" [" + len.ToString() + "]");
+                    for (UInt64 i = 0; i != len; i++)
+                    {
+                        sb.Append("  [" + i.ToString() + "] ");
+                        rmsgpack_dump(rdb, sb, ref off);
+                    }
+                    return MsgPackMode.Array;
+                case (byte)MsgPackType.MAP16: sb.Append("[MAP16]"); len = BitConverter.ToUInt16(rdb, off).FromBigEndian(); off += 2; goto READ_MAP;
+                case (byte)MsgPackType.MAP32: sb.Append("[MAP32]"); len = BitConverter.ToUInt32(rdb, off).FromBigEndian(); off += 4; goto READ_MAP;
+                READ_MAP:
+                    sb.AppendLine(" [" + len.ToString() + "]");
+                    for (UInt64 i = 0; i != len; i++)
+                    {
+                        sb.Append("  [KEY] ");
+                        if (rmsgpack_dump(rdb, sb, ref off) != MsgPackMode.String) throw new Exception("RDB Key must be a string");
+                        sb.Append("  [VAL] ");
+                        rmsgpack_dump(rdb, sb, ref off);
+                    }
+                    return MsgPackMode.Map;
+                default:
+                    if      (type < (byte)MsgPackType.FIXMAP)   { sb.AppendLine("[SMALLPOSNUM] "  + type.ToString()); return MsgPackMode.Signed; }
+                    else if (type < (byte)MsgPackType.FIXARRAY) { sb.Append("[FIXMAP]");   len = (UInt64)(type - (byte)MsgPackType.FIXMAP);   goto READ_MAP;    }
+                    else if (type < (byte)MsgPackType.FIXSTR)   { sb.Append("[FIXARRAY]"); len = (UInt64)(type - (byte)MsgPackType.FIXARRAY); goto READ_ARRAY;  }
+                    else if (type < (byte)MsgPackType.NIL)      { sb.Append("[FIXSTR]");   len = (UInt64)(type - (byte)MsgPackType.FIXSTR);   goto READ_STRING; }
+                    else if (type > (byte)MsgPackType.MAP32)    { sb.AppendLine("[SMALLNEGNUM] "  + ((int)type - 0xff - 1).ToString()); return MsgPackMode.Signed; }
+                    break;
+            }
+            throw new Exception("Unknown MSGPACK type");
+        }
+
+        public static void DumpRDB(string rdbPath, string outPath)
+        {
+            byte[] rdb = File.ReadAllBytes(rdbPath);
+            UInt64 magic = (rdb.Length >= 8 ? BitConverter.ToUInt64(rdb, 0).FromBigEndian() : 0);
+            UInt64 metaoffset = (rdb.Length >= 16 ? BitConverter.ToUInt64(rdb, 8).FromBigEndian() : 0);
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("RDB IDENTIFIER: " + magic.ToString() + (magic == 0x5241524348444200 ? " (VALID \"RARCHDB\\0\")" : " (INVALID)"));
+            sb.AppendLine("META DATA OFFSET: " + metaoffset.ToString());
+            int off = (int)metaoffset, dataend = (metaoffset > 16 ? (int)metaoffset : (int)rdb.LongLength);
+            if (metaoffset > 16)
+            {
+                sb.AppendLine("-------------------- META START --------------------");
+                while (off < rdb.LongLength) rmsgpack_dump(rdb, sb, ref off);
+                sb.AppendLine("-------------------- META END --------------------");
+            }
+            off = 16;
+            while (off < dataend)
+            {
+                sb.AppendLine("");
+                rmsgpack_dump(rdb, sb, ref off);
+            }
+            File.WriteAllText(outPath, sb.ToString());
+        }
+
         void LoadRDB(string rdbPath, bool isInit)
         {
             List<object> objs = new List<object>();
@@ -2043,6 +2131,24 @@ namespace RDBEd
                 {
                     Data.GenerateDeltaDAT(mf.in1Path.Text, mf.in2Path.Text, mf.outPath.Text, key, mf.option2Check.Checked);
                 });
+            };
+
+            f.menuToolDumpRDBFile.Click += (object sender, EventArgs e) =>
+            {
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.CheckFileExists = true;
+                ofd.Filter = "RDB file|*.rdb|All files (*.*)|*.*";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.Filter = "TXT file (*.txt)|*.txt|All files (*.*)|*.*";
+                    sfd.DefaultExt = "txt";
+                    sfd.FileName = ofd.FileName + ".txt";
+                    string saveFile = (sfd.ShowDialog() == DialogResult.OK ? sfd.FileName : null);
+                    sfd.Dispose();
+                    if (saveFile != null) EntryList.DumpRDB(ofd.FileName, saveFile);
+                }
+                ofd.Dispose();
             };
 
             f.menuValidateUnique.Click += (object sender, EventArgs e) =>

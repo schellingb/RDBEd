@@ -1,5 +1,5 @@
 /*  RDBEd - Retro RDB & DAT Editor
- *  Copyright (C) 2020 - Bernhard Schelling
+ *  Copyright (C) 2023 - Bernhard Schelling
  *
  *  RDBEd is free software: you can redistribute it and/or modify it under the terms
  *  of the GNU General Public License as published by the Free Software Found-
@@ -74,6 +74,7 @@ namespace RDBEd
         public ToolStripMenuItem menuEditPaste;
         public ToolStripMenuItem menuEditDelete;
         public ToolStripMenuItem menuSaveAs;
+        public ToolStripMenuItem menuToolDumpRDBFile;
 
         /// <summary>
         /// Required designer variable.
@@ -140,6 +141,7 @@ namespace RDBEd
             this.menuToolUnify = new System.Windows.Forms.ToolStripMenuItem();
             this.menuToolGenerateTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuToolDeltaDAT = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuToolDumpRDBFile = new System.Windows.Forms.ToolStripMenuItem();
             this.validateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuValidateUnique = new System.Windows.Forms.ToolStripMenuItem();
             this.menuValidateField = new System.Windows.Forms.ToolStripMenuItem();
@@ -269,7 +271,8 @@ namespace RDBEd
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuToolUnify,
             this.menuToolGenerateTags,
-            this.menuToolDeltaDAT});
+            this.menuToolDeltaDAT,
+            this.menuToolDumpRDBFile});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -291,6 +294,12 @@ namespace RDBEd
             this.menuToolDeltaDAT.Name = "menuToolDeltaDAT";
             this.menuToolDeltaDAT.Size = new System.Drawing.Size(275, 22);
             this.menuToolDeltaDAT.Text = "Create &Delta DAT from Two Files...";
+            // 
+            // menuToolDumpRDBFile
+            // 
+            this.menuToolDumpRDBFile.Name = "menuToolDumpRDBFile";
+            this.menuToolDumpRDBFile.Size = new System.Drawing.Size(275, 22);
+            this.menuToolDumpRDBFile.Text = "Dump &RDB File...";
             // 
             // validateToolStripMenuItem
             // 
