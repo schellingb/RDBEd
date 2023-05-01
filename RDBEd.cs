@@ -724,7 +724,8 @@ namespace RDBEd
             Action<string> MsgPackWriteString = (string s) =>
             {
                 int len = System.Text.Encoding.UTF8.GetByteCount(s);
-                if      (len <   256) { f.Write((byte)MsgPackType.STR8);  f.Write((byte)len); }
+                if (len < ((int)MsgPackType.NIL - (int)MsgPackType.FIXSTR)) f.Write((byte)(len + (int)MsgPackType.FIXSTR));
+                else if (len <   256) { f.Write((byte)MsgPackType.STR8);  f.Write((byte)len); }
                 else if (len < 65536) { f.Write((byte)MsgPackType.STR16); f.Write(((ushort)len).ToBigEndian()); }
                 else                  { f.Write((byte)MsgPackType.STR32); f.Write(((uint)len).ToBigEndian()); }
                 if (len > writeBuf.Length) writeBuf = new byte[len];
