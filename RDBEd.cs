@@ -1,5 +1,5 @@
 /*  RDBEd - Retro RDB & DAT Editor
- *  Copyright (C) 2020-2021 - Bernhard Schelling
+ *  Copyright (C) 2020-2023 - Bernhard Schelling
  *
  *  RDBEd is free software: you can redistribute it and/or modify it under the terms
  *  of the GNU General Public License as published by the Free Software Found-
@@ -22,10 +22,10 @@ using System.Text.RegularExpressions;
 
 [assembly: System.Reflection.AssemblyProduct("RDBEd")]
 [assembly: System.Reflection.AssemblyTitle("RDBEd - Retro RDB & DAT Editor")]
-[assembly: System.Reflection.AssemblyVersion("1.3.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.3.0.0")]
+[assembly: System.Reflection.AssemblyVersion("1.4.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.4.0.0")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
-namespace RDBEd { static class About { public const string Text = "RDBEd 1.3 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
+namespace RDBEd { static class About { public const string Text = "RDBEd 1.4 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
 
 namespace RDBEd
 {

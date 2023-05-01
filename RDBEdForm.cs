@@ -1,5 +1,5 @@
 /*  RDBEd - Retro RDB & DAT Editor
- *  Copyright (C) 2023 - Bernhard Schelling
+ *  Copyright (C) 2020-2023 - Bernhard Schelling
  *
  *  RDBEd is free software: you can redistribute it and/or modify it under the terms
  *  of the GNU General Public License as published by the Free Software Found-
