@@ -68,6 +68,9 @@ Tags generated are 'Unlicensed', 'Pirate', 'Arcade', 'Demo', 'Beta', 'Sample', '
 ### Tools -> Create Delta DAT from Two Files
 Create a new DAT file with all changes between the two selected input files (can be either RDB or DAT).
 
+### Tools -> Dump RDB File
+Export the raw contents of an RDB file to a human readable text file to analyze or compare.
+
 ### Validate -> Validate Unique Field
 Will mark all values of a field that are not unique in the loaded dataset with a warning.
 
