@@ -761,17 +761,23 @@ namespace RDBEd
                 if (count < 16) f.Write((byte)((byte)MsgPackType.FIXMAP + count));
                 else { f.Write((byte)MsgPackType.MAP16); f.Write(((ushort)count).ToBigEndian()); }
             };
+            //Action<int> MsgPackWriteInt = (int i) =>
+            //{
+            //    if      (i >= 0 && i < (int)MsgPackType.FIXMAP)          { f.Write((byte)i); }
+            //    else if (i <  0 && i >= (0xff - (int)MsgPackType.MAP32)) { f.Write((byte)(256+i)); }
+            //    else if (i >=   -128 && i <   128) { f.Write((byte)MsgPackType.INT8);  f.Write((sbyte)i); }
+            //    else if (i >= -65536 && i < 65536) { f.Write((byte)MsgPackType.INT16); f.Write(((short)i).ToBigEndian()); }
+            //    else                               { f.Write((byte)MsgPackType.INT32); f.Write(((int)i).ToBigEndian()); }
+            //};
             Action<uint> MsgPackWriteUint = (uint i) =>
             {
-                if (i < (uint)MsgPackType.FIXMAP) { f.Write((byte)i); }
-                else if (i <   256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
+                if      (i <   256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
                 else if (i < 65536) { f.Write((byte)MsgPackType.UINT16); f.Write(((ushort)i).ToBigEndian()); }
                 else                { f.Write((byte)MsgPackType.UINT32); f.Write(((uint)i).ToBigEndian()); }
             };
             Action<UInt64> MsgPackWriteUint64 = (UInt64 i) =>
             {
-                if (i < (uint)MsgPackType.FIXMAP) { f.Write((byte)i); }
-                else if (i <        256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
+                if      (i <        256) { f.Write((byte)MsgPackType.UINT8);  f.Write((byte)i); }
                 else if (i <      65536) { f.Write((byte)MsgPackType.UINT16); f.Write(((ushort)i).ToBigEndian()); }
                 else if (i < 4294967295) { f.Write((byte)MsgPackType.UINT32); f.Write(((uint)i).ToBigEndian()); }
                 else                     { f.Write((byte)MsgPackType.UINT64); f.Write(((UInt64)i).ToBigEndian()); }
