@@ -19,11 +19,6 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
-
-[assembly: System.Reflection.AssemblyProduct("RDBEd")]
-[assembly: System.Reflection.AssemblyTitle("RDBEd - Retro RDB & DAT Editor")]
-[assembly: System.Reflection.AssemblyVersion("1.4.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.4.0.0")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
 namespace RDBEd { static class About { public const string Text = "RDBEd 1.4 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
 
@@ -1690,17 +1685,22 @@ namespace RDBEd
                 if (e.Button == MouseButtons.Right)
                 {
                     Point menuPos = f.gridMain.PointToClient(Cursor.Position);
-                    ContextMenu context = new ContextMenu();
+                    // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                    ContextMenuStrip context = new ContextMenuStrip();
                     foreach (DataGridViewColumn col in f.gridMain.Columns)
                     {
-                        MenuItem i = context.MenuItems.Add(col.HeaderText);
+                        // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                        ToolStripMenuItem i = context.MenuItems.Add(col.HeaderText);
                         i.Checked = col.Visible;
                         i.Tag = col;
                         i.Click += (object objI, EventArgs ee) =>
                         {
-                            (objI as MenuItem).Checked ^= true;
-                            ((DataGridViewColumn)(objI as MenuItem).Tag).Visible ^= true;
-                            (objI as MenuItem).GetContextMenu().Show(f.gridMain, menuPos);
+                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                            (objI as ToolStripMenuItem).Checked ^= true;
+                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                            ((DataGridViewColumn)(objI as ToolStripMenuItem).Tag).Visible ^= true;
+                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                            (objI as ToolStripMenuItem).GetContextMenu().Show(f.gridMain, menuPos);
                         };
                     }
                     context.Show(f.gridMain, menuPos);
@@ -1840,8 +1840,9 @@ namespace RDBEd
                 MouseEventArgs me = e as MouseEventArgs;
                 if (me == null || me.Button != MouseButtons.Right) return;
                 if (f.gridMain.HitTest(me.X, me.Y).Type != DataGridViewHitTestType.None) return;
-                ContextMenu context = new ContextMenu();
-                context.MenuItems.Add("Add New Row").Click += (object objI, EventArgs ee) =>
+                // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                ContextMenuStrip context = new ContextMenuStrip();
+                context.Items.Add("Add New Row").Click += (object objI, EventArgs ee) =>
                 {
                     int fdRow    = (f.gridMain.FirstDisplayedCell != null ? f.gridMain.FirstDisplayedCell.RowIndex    : 0);
                     int fdColumn = (f.gridMain.FirstDisplayedCell != null ? f.gridMain.FirstDisplayedCell.ColumnIndex : 0);
@@ -1859,7 +1860,8 @@ namespace RDBEd
                 if (e.RowIndex < 0 || e.RowIndex >= Data.Filter.Count || e.ColumnIndex < 0 || e.Button != MouseButtons.Right) return;
                 DataGridViewCell cell = f.gridMain[e.ColumnIndex, e.RowIndex];
 
-                ContextMenu context = new ContextMenu();
+                // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+                ContextMenuStrip context = new ContextMenuStrip();
 
                 if (cell.Selected)
                 {
@@ -1969,6 +1971,7 @@ namespace RDBEd
                         new KeyValuePair<string, string>("IGDB",               "https://www.igdb.com/search?type=1&q=asdf"),
                     })
                     {
+                        // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                         MenuItem i = context.MenuItems.Add(u.Key);
                         i.Click += (object objI, EventArgs ee) =>
                         {
