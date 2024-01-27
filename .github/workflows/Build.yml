@@ -1,0 +1,45 @@
+name: Build RDBeD
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [run_build]
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        version: [2022]
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET command line
+        uses: actions/setup-dotnet@v4
+        with:
+            dotnet-version: 8.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: package app
+        run: dotnet publish ./RDBEd.csproj /t:Publish
+
+      - name: Get SHA
+        id: slug
+        shell: powershell
+        run: echo "sha8=$('${{github.sha}}'.Substring(0,8))"  >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RDBeD-${{matrix.version}}-${{matrix.configuration}}-${{ steps.slug.outputs.sha8 }}
+          path: ${{matrix.configuration}}/**/*
+
