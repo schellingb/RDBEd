@@ -1690,17 +1690,26 @@ namespace RDBEd
                     foreach (DataGridViewColumn col in f.gridMain.Columns)
                     {
                         // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-                        ToolStripMenuItem i = context.MenuItems.Add(col.HeaderText);
+                        ToolStripMenuItem i = new ToolStripMenuItem(col.HeaderText);
                         i.Checked = col.Visible;
                         i.Tag = col;
                         i.Click += (object objI, EventArgs ee) =>
                         {
-                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-                            (objI as ToolStripMenuItem).Checked ^= true;
-                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-                            ((DataGridViewColumn)(objI as ToolStripMenuItem).Tag).Visible ^= true;
-                            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-                            (objI as ToolStripMenuItem).GetContextMenu().Show(f.gridMain, menuPos);
+                            ToolStripMenuItem clickedItem = objI as ToolStripMenuItem;
+                            if (clickedItem != null)
+                            {
+                                clickedItem.Checked ^= true;
+                                DataGridViewColumn clickedColumn = clickedItem.Tag as DataGridViewColumn;
+                                if (clickedColumn != null)
+                                {
+                                    clickedColumn.Visible ^= true;
+                                    ContextMenuStrip contextMenu = clickedItem.GetCurrentParent() as ContextMenuStrip;
+                                    if (contextMenu != null)
+                                    {
+                                        contextMenu.Show(f.gridMain, menuPos);
+                                    }
+                                }
+                            }
                         };
                     }
                     context.Show(f.gridMain, menuPos);
@@ -1876,7 +1885,7 @@ namespace RDBEd
 
                     if (revertable != 0)
                     {
-                        context.MenuItems.Add("Revert " + (revertable != 1 ? revertable + " Values" : "Value")).Click += (object objI, EventArgs ee) =>
+                        context.Items.Add("Revert " + (revertable != 1 ? revertable + " Values" : "Value")).Click += (object objI, EventArgs ee) =>
                         {
                             if (MessageBox.Show("Are you sure you want to revert " + revertable + " value" + (revertable != 1 ? "s" : "") + "?", "Revert", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
                             foreach (DataGridViewCell c in f.gridMain.SelectedCells)
@@ -1888,9 +1897,9 @@ namespace RDBEd
                             }
                         };
                     }
-
                     int rowCount = (rowLast - rowFirst) + 1;
-                    if (context.MenuItems.Count != 0) context.MenuItems.Add("-");
+                    if (context.Items.Count != 0) context.Items.Add(new ToolStripSeparator());
+
                     Action<int, int> AddRows = (int filterIdx, int allIdx) =>
                     {
                         int fdRow = f.gridMain.FirstDisplayedCell.RowIndex, fdColumn = f.gridMain.FirstDisplayedCell.ColumnIndex;
@@ -1903,10 +1912,19 @@ namespace RDBEd
                         RefreshBinding(updateCount: true);
                         f.gridMain.FirstDisplayedCell = f.gridMain[fdColumn, fdRow];
                     };
+
                     string nRows = (rowCount > 1 ? " " + rowCount + " Rows" : " Row");
-                    context.MenuItems.Add("Add" + nRows + " Above").Click += (object objI, EventArgs ee) => AddRows(rowFirst, Data.AllEntries.IndexOf(Data.Filter[rowFirst]));
-                    context.MenuItems.Add("Add" + nRows + " Below").Click += (object objI, EventArgs ee) => AddRows(rowLast + 1, Data.AllEntries.IndexOf(Data.Filter[rowLast]) + 1);
-                    context.MenuItems.Add("Remove" + nRows).Click += (object objI, EventArgs ee) =>
+
+                    ToolStripMenuItem addAboveItem = new ToolStripMenuItem("Add" + nRows + " Above");
+                    addAboveItem.Click += (object objI, EventArgs ee) => AddRows(rowFirst, Data.AllEntries.IndexOf(Data.Filter[rowFirst]));
+                    context.Items.Add(addAboveItem);
+
+                    ToolStripMenuItem addBelowItem = new ToolStripMenuItem("Add" + nRows + " Below");
+                    addBelowItem.Click += (object objI, EventArgs ee) => AddRows(rowLast + 1, Data.AllEntries.IndexOf(Data.Filter[rowLast]) + 1);
+                    context.Items.Add(addBelowItem);
+
+                    ToolStripMenuItem removeRowsItem = new ToolStripMenuItem("Remove" + nRows);
+                    removeRowsItem.Click += (object objI, EventArgs ee) =>
                     {
                         if (MessageBox.Show("Are you sure you want to remove " + rowCount + " row" + (rowCount > 1 ? "s" : "") + "?", "Remove", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
                         int fdRow = f.gridMain.FirstDisplayedCell.RowIndex, fdColumn = f.gridMain.FirstDisplayedCell.ColumnIndex;
@@ -1922,10 +1940,11 @@ namespace RDBEd
                         Data.Recount();
                         RefreshBinding(updateCount: false);
                     };
+                    context.Items.Add(removeRowsItem);
                 }
                 else if ((Data.Filter[e.RowIndex].FieldFlags[e.ColumnIndex] & EFieldFlag.Modified) != 0 && (Data.Filter[e.RowIndex].RowFlags & ERowFlag.FromFile) != 0)
                 {
-                    context.MenuItems.Add("Revert").Click += (object objI, EventArgs ee) =>
+                    context.Items.Add("Revert").Click += (object objI, EventArgs ee) =>
                     {
                         Data.Filter[e.RowIndex].Revert(f.gridMain.Columns[e.ColumnIndex].DataPropertyName);
                     };
@@ -1943,22 +1962,22 @@ namespace RDBEd
                     }
                 };
                 bool hasValue = (cellValue != null && cellValue.ToString().Length != 0);
-                if (context.MenuItems.Count != 0) context.MenuItems.Add("-");
+                if (context.Items.Count != 0) context.Items.Add("-");
                 if (hasValue)
                 {
                     string cellStr = (cellValue.ToString().Length > 20 ? cellValue.ToString().Substring(0, 20) + "..." : cellValue.ToString());
-                    context.MenuItems.Add("Filter '" + cellStr + "'").Click += (object objI, EventArgs ee) => { AppendFilter(true); };
-                    context.MenuItems.Add("Filter NOT '" + cellStr + "'").Click += (object objI, EventArgs ee) => { AppendFilter(false); };
+                    context.Items.Add("Filter '" + cellStr + "'").Click += (object objI, EventArgs ee) => { AppendFilter(true); };
+                    context.Items.Add("Filter NOT '" + cellStr + "'").Click += (object objI, EventArgs ee) => { AppendFilter(false); };
                 }
                 else
                 {
-                    context.MenuItems.Add("Filter Empty").Click += (object objI, EventArgs ee) => { AppendFilter(true); };
-                    context.MenuItems.Add("Filter NOT Empty").Click += (object objI, EventArgs ee) => { AppendFilter(false); };
+                    context.Items.Add("Filter Empty").Click += (object objI, EventArgs ee) => { AppendFilter(true); };
+                    context.Items.Add("Filter NOT Empty").Click += (object objI, EventArgs ee) => { AppendFilter(false); };
                 }
 
                 if (hasValue && f.webView != null)
                 {
-                    if (context.MenuItems.Count != 0) context.MenuItems.Add("-");
+                    if (context.Items.Count != 0) context.Items.Add("-");
                     foreach (var u in new KeyValuePair<string, string>[]
                     {
                         new KeyValuePair<string, string>("Google",             "https://www.google.com/search?ie=utf-8&oe=utf-8&q=" ),
@@ -1972,7 +1991,7 @@ namespace RDBEd
                     })
                     {
                         // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-                        MenuItem i = context.MenuItems.Add(u.Key);
+                        ToolStripItem i = context.Items.Add(u.Key);
                         i.Click += (object objI, EventArgs ee) =>
                         {
                             if (f.splitContainer.Panel2Collapsed)
@@ -1984,7 +2003,7 @@ namespace RDBEd
                         };
                     }
                 }
-                if (context.MenuItems.Count != 0)
+                if (context.Items.Count != 0)
                     context.Show(f.gridMain, f.gridMain.PointToClient(Cursor.Position));
                 return;
             };
