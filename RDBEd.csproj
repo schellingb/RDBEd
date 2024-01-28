@@ -19,6 +19,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>false</BootstrapperEnabled>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
@@ -28,14 +29,12 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release45'">
-    <OutputPath Condition="'$(Configuration)'=='Release45'">Release\45\</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutputPath>Release\</OutputPath>
     <IntermediateOutputPath>$(OutputPath)</IntermediateOutputPath>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants Condition="'$(TargetFrameworkVersion)'=='v3.5'">DOTNET35</DefineConstants>
-    <DefineConstants Condition="'$(TargetFrameworkVersion)'=='v4.5'">DOTNET45</DefineConstants>
     <Product>RDBEd</Product>
     <AssemblyTitle>RDBEd - Retro RDB &amp; DAT Editor</AssemblyTitle>
     <AssemblyVersion>1.4.0.0</AssemblyVersion>
@@ -43,13 +42,9 @@
     <Nullable>warnings</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DefineConstants>DEBUG;DOTNET45</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="RDBEd.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Debug\.NETFramework,Version=v4.5.AssemblyAttributes.cs" />
-    <Compile Remove="Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
   </ItemGroup>
 </Project>
