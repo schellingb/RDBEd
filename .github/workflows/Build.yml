@@ -30,8 +30,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
-      - name: Create Docker Image
-        run: dotnet publish ./Wowshop.API/Wowshop.API.csproj /t:PublishContainer -r linux-x64
+      - name: package app
+        run: dotnet publish ./RDBEd.csproj /t:Publish
 
       - name: Get SHA
         id: slug
