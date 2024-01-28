@@ -1685,11 +1685,9 @@ namespace RDBEd
                 if (e.Button == MouseButtons.Right)
                 {
                     Point menuPos = f.gridMain.PointToClient(Cursor.Position);
-                    // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                     ContextMenuStrip context = new ContextMenuStrip();
                     foreach (DataGridViewColumn col in f.gridMain.Columns)
                     {
-                        // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                         ToolStripMenuItem i = new ToolStripMenuItem(col.HeaderText);
                         i.Checked = col.Visible;
                         i.Tag = col;
@@ -1849,7 +1847,6 @@ namespace RDBEd
                 MouseEventArgs me = e as MouseEventArgs;
                 if (me == null || me.Button != MouseButtons.Right) return;
                 if (f.gridMain.HitTest(me.X, me.Y).Type != DataGridViewHitTestType.None) return;
-                // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                 ContextMenuStrip context = new ContextMenuStrip();
                 context.Items.Add("Add New Row").Click += (object objI, EventArgs ee) =>
                 {
@@ -1869,7 +1866,6 @@ namespace RDBEd
                 if (e.RowIndex < 0 || e.RowIndex >= Data.Filter.Count || e.ColumnIndex < 0 || e.Button != MouseButtons.Right) return;
                 DataGridViewCell cell = f.gridMain[e.ColumnIndex, e.RowIndex];
 
-                // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                 ContextMenuStrip context = new ContextMenuStrip();
 
                 if (cell.Selected)
@@ -1990,7 +1986,6 @@ namespace RDBEd
                         new KeyValuePair<string, string>("IGDB",               "https://www.igdb.com/search?type=1&q=asdf"),
                     })
                     {
-                        // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
                         ToolStripItem i = context.Items.Add(u.Key);
                         i.Click += (object objI, EventArgs ee) =>
                         {

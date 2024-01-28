@@ -40,6 +40,7 @@
     <AssemblyTitle>RDBEd - Retro RDB &amp; DAT Editor</AssemblyTitle>
     <AssemblyVersion>1.4.0.0</AssemblyVersion>
     <FileVersion>1.4.0.0</FileVersion>
+    <Nullable>warnings</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DefineConstants>DEBUG;DOTNET45</DefineConstants>
