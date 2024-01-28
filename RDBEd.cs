@@ -12,13 +12,14 @@
  *  You should have received a copy of the GNU General Public License along with RDBEd.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-
+using System.Runtime.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+[assembly: SupportedOSPlatform("windows")]
 [assembly: System.Runtime.InteropServices.ComVisible(false)]
 namespace RDBEd { static class About { public const string Text = "RDBEd 1.4 - Retro RDB & DAT Editor\n\nhttps://github.com/schellingb/RDBEd"; } }
 
@@ -1627,7 +1628,7 @@ namespace RDBEd
             mf.btnCancel.Click += (object s, EventArgs e) => mf.Close();
             mf.ShowDialog();
         }
-
+        [SupportedOSPlatform("windows")]
         [STAThread] static void Main(string[] args)
         {
             Application.EnableVisualStyles();
