@@ -1628,7 +1628,6 @@ namespace RDBEd
             mf.btnCancel.Click += (object s, EventArgs e) => mf.Close();
             mf.ShowDialog();
         }
-        [SupportedOSPlatform("windows")]
         [STAThread] static void Main(string[] args)
         {
             Application.EnableVisualStyles();
