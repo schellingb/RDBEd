@@ -23,6 +23,7 @@ namespace RDBEd
     {
         public MultiForm()
         {
+            Application.SetDefaultFont(new Font(new FontFamily("Microsoft Sans Serif"), 8f));
             InitializeComponent();
             this.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
         }
